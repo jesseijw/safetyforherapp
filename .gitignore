@@ -1,3 +1,8 @@
 
 # Local reference files
 /.local-reference/
+
+node_modules/
+dist/
+.env*
+*.local

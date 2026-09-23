@@ -1,0 +1,29 @@
+{
+  "name": "safetrip",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "NODE_OPTIONS=--no-experimental-webstorage vitest run",
+    "format": "prettier --write src index.html package.json"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.6.0",
+    "jsdom": "^26.0.0",
+    "prettier": "^3.9.9",
+    "vite": "^6.1.0",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
