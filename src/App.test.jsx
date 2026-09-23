@@ -82,11 +82,11 @@ describe("complete demo journeys", () => {
     fireEvent.change(screen.getByPlaceholderText("Search demo destinations"), {
       target: { value: "Library" },
     });
-    click("Riverside Library Library");
+    click("Orlando Public Library Library");
     fireEvent.click(screen.getByRole("radio", { name: /Fastest route/ }));
     click("Start fastest route");
     expect(
-      screen.getByRole("heading", { name: "Riverside Library" }),
+      screen.getByRole("heading", { name: "Orlando Public Library" }),
     ).toBeTruthy();
     click("I’m okay · Check in");
     click("Finish demo trip");
@@ -169,9 +169,111 @@ describe("complete demo journeys", () => {
         .getByRole("radio", { name: /Public transit/ })
         .getAttribute("aria-checked"),
     ).toBe("true");
-    expect(screen.getByText("Market Street Station")).toBeTruthy();
+    expect(screen.getByText("Church Street Station")).toBeTruthy();
     await expect(
       registered[0].execute({ destination: "unknown", route: "safe" }),
     ).rejects.toThrow();
+  });
+});
+
+describe("personal map reports", () => {
+  it("requires a location, saves an area and note, and renders it at that location", () => {
+    render(<App />);
+    click("Report");
+    expect(
+      screen.getByRole("button", { name: "Save my report" }).disabled,
+    ).toBe(true);
+    const picker = screen.getByRole("button", {
+      name: /Choose report location/,
+    });
+    fireEvent.keyDown(picker, { key: "ArrowRight" });
+    fireEvent.change(screen.getByLabelText("Area size"), {
+      target: { value: "75" },
+    });
+    fireEvent.change(screen.getByLabelText("Details (optional)"), {
+      target: { value: "Very dark around this corner after sunset." },
+    });
+    click("Save my report");
+    const report = JSON.parse(localStorage.getItem(STORAGE_KEY)).reports[0];
+    expect(report).toMatchObject({
+      x: 205,
+      y: 325,
+      radius: 75,
+      description: "Very dark around this corner after sunset.",
+    });
+    const marker = screen.getByRole("button", {
+      name: "Your report: Poor lighting",
+    });
+    expect(marker.style.left).toBe(`${(205 / 390) * 100}%`);
+    fireEvent.click(marker);
+    expect(screen.getByText(report.description)).toBeTruthy();
+    click("Delete this report");
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)).reports).toHaveLength(
+      0,
+    );
+  });
+});
+
+describe("Orlando sample activity map", () => {
+  it("filters counts, switches to incident dots, and handles no matching types", () => {
+    location.hash = "activity";
+    render(<App />);
+    expect(
+      screen.getByRole("heading", { name: "Downtown Orlando" }),
+    ).toBeTruthy();
+    const getCount = () =>
+      Number(screen.getByRole("status").querySelector("b").textContent);
+    const six = getCount();
+    click("Last year");
+    expect(getCount()).toBeGreaterThan(six);
+    click("Last month");
+    expect(getCount()).toBeLessThan(six);
+    click("Incident dots");
+    expect(
+      screen.getAllByRole("button", {
+        name: /^Sample (Theft|Burglary|Assault|Vandalism),/,
+      }),
+    ).toHaveLength(getCount());
+    click("Incident types · 4/4");
+    for (const type of ["Theft", "Burglary", "Assault", "Vandalism"])
+      fireEvent.click(screen.getByRole("checkbox", { name: type }));
+    click("Show results");
+    expect(getCount()).toBe(0);
+    expect(screen.getByText("No matching sample incidents")).toBeTruthy();
+  });
+  it("edits a personal area without duplicating it or affecting incident counts", () => {
+    const data = initialState();
+    data.reports = [
+      {
+        id: "r1",
+        type: "Poor lighting",
+        description: "Before",
+        x: 100,
+        y: 300,
+        radius: 25,
+        created: Date.now(),
+      },
+    ];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    location.hash = "activity";
+    render(<App />);
+    const before = screen.getByRole("status").textContent;
+    click("Your report: Poor lighting");
+    click("Edit my report");
+    fireEvent.change(screen.getByLabelText("Details (optional)"), {
+      target: { value: "After" },
+    });
+    click("Save my report");
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)).reports;
+    expect(saved).toHaveLength(1);
+    expect(saved[0]).toMatchObject({
+      id: "r1",
+      description: "After",
+      x: 100,
+      y: 300,
+    });
+    expect(
+      screen.getAllByRole("status").some((s) => s.textContent === before),
+    ).toBe(true);
   });
 });

@@ -1,3 +1,5 @@
+import ActivityPage from "./pages/ActivityPage";
+import ReportLocation from "./components/ReportLocation";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   MapPin,
@@ -34,6 +36,7 @@ import {
   completeTrip,
 } from "./state";
 const pages = [
+  "activity",
   "home",
   "routes",
   "sos",
@@ -76,7 +79,10 @@ export default function App() {
     );
   const [shareRecipients, setShareRecipients] = useState([]),
     [reportType, setReportType] = useState("Poor lighting"),
-    [reportText, setReportText] = useState("");
+    [reportText, setReportText] = useState(""),
+    [reportLocation, setReportLocation] = useState(null),
+    [reportRadius, setReportRadius] = useState(45),
+    [reportEditId, setReportEditId] = useState(null);
   const timer = useRef(),
     holdTimer = useRef(),
     held = useRef(false),
@@ -260,7 +266,7 @@ export default function App() {
     suppressClick.current = true;
   };
   const navActive =
-    page === "home"
+    page === "home" || page === "activity"
       ? "home"
       : page === "routes"
         ? "routes"
@@ -315,7 +321,12 @@ export default function App() {
                 reports={data.reports}
                 filters={filters}
                 onFilters={() => setModal({ type: "filters" })}
-                onReport={() => setModal({ type: "report" })}
+                onReport={() => {
+                  setReportEditId(null);
+                  setReportLocation(null);
+                  setReportText("");
+                  setModal({ type: "report" });
+                }}
                 locateEnabled={data.settings.location}
                 onPoint={(point) => setModal({ type: "point", point })}
               />
@@ -332,13 +343,10 @@ export default function App() {
                   {data.profile.name.charAt(0) || "M"}
                 </button>
               </div>
-              {data.settings.notices && (
-                <button
-                  className="map-notice"
-                  onClick={() => setModal({ type: "notice" })}
-                >
-                  <span className="notice-dot" /> A little busier around Market
-                  St <span>›</span>
+              {true && (
+                <button className="map-notice" onClick={() => go("activity")}>
+                  <span className="notice-dot" /> Downtown Orlando · View
+                  activity <span>›</span>
                 </button>
               )}
               <section className="home-sheet">
@@ -379,6 +387,18 @@ export default function App() {
                 </button>
               </section>
             </>
+          ) : page === "activity" ? (
+            <ActivityPage
+              reports={data.reports}
+              onBack={() => go("home")}
+              onReport={() => {
+                setReportEditId(null);
+                setReportLocation(null);
+                setReportText("");
+                setModal({ type: "report" });
+              }}
+              onPoint={(point) => setModal({ type: "point", point })}
+            />
           ) : page === "routes" ? (
             <TripsPage
               data={data}
@@ -482,7 +502,7 @@ export default function App() {
             {
               search: "Where are you heading?",
               filters: "Your map, your way",
-              report: "Report a concern",
+              report: "Mark an area of concern",
               point: modal.point?.name,
               notice: "Around the neighborhood",
               call: `${modal.name === "911" ? "Call 911?" : modal.name}`,
@@ -506,9 +526,7 @@ export default function App() {
                   onChange={(e) => setQuery(e.target.value)}
                 />
               </label>
-              <p className="caption">
-                Explore our fictional demo neighborhood.
-              </p>
+              <p className="caption">Explore the downtown Orlando demo map.</p>
               <div className="search-results">
                 {destinations
                   .filter((d) =>
@@ -536,7 +554,7 @@ export default function App() {
                   d.name.toLowerCase().includes(query.toLowerCase()),
                 ) && (
                   <Empty title="No places found">
-                    Try “Union”, “Library”, “Café”, or “Station”.
+                    Try “Union”, “Library”, “Civic building”, or “Station”.
                   </Empty>
                 )}
               </div>
@@ -566,13 +584,17 @@ export default function App() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+                if (!reportLocation) return;
                 setData((s) => ({
                   ...s,
                   reports: [
-                    ...s.reports,
+                    ...s.reports.filter((r) => r.id !== reportEditId),
                     {
-                      id: crypto.randomUUID(),
+                      id: reportEditId || crypto.randomUUID(),
                       type: reportType,
+                      x: reportLocation.x,
+                      y: reportLocation.y,
+                      radius: reportRadius,
                       description: reportText,
                       created: Date.now(),
                     },
@@ -587,8 +609,9 @@ export default function App() {
               }}
             >
               <p className="muted">
-                Add a sample concern at the demo location. Reports stay in this
-                browser.
+                Mark an area that felt unsafe and note what you observed. Your
+                reports stay in this browser, separate from official crime
+                records.
               </p>
               <label className="field">
                 <span>Concern</span>
@@ -599,7 +622,25 @@ export default function App() {
                   <option>Poor lighting</option>
                   <option>Blocked walkway</option>
                   <option>Uncomfortable encounter</option>
+                  <option>Isolated area</option>
+                  <option>Harassment</option>
                   <option>Other concern</option>
+                </select>
+              </label>
+              <ReportLocation
+                value={reportLocation}
+                onChange={setReportLocation}
+                radius={reportRadius}
+              />
+              <label className="field">
+                <span>Area size</span>
+                <select
+                  value={reportRadius}
+                  onChange={(e) => setReportRadius(Number(e.target.value))}
+                >
+                  <option value={25}>Small spot</option>
+                  <option value={45}>Around a block</option>
+                  <option value={75}>Wider area</option>
                 </select>
               </label>
               <TextField
@@ -609,7 +650,9 @@ export default function App() {
                 value={reportText}
                 onChange={(e) => setReportText(e.target.value)}
               />
-              <button className="primary">Save demo report</button>
+              <button className="primary" disabled={!reportLocation}>
+                Save my report
+              </button>
             </form>
           )}
           {modal.type === "point" && (
@@ -619,8 +662,28 @@ export default function App() {
               </div>
               <p className="muted">{modal.point.note}</p>
               <p className="caption">
-                Fictional location for this preview. Availability is not live.
+                {modal.point.created
+                  ? `Your personal report · ${new Date(modal.point.created).toLocaleDateString()}. Not an official crime record.`
+                  : "Sample information for this preview, not a verified real-world record."}
               </p>
+              {modal.point.created && (
+                <button
+                  className="secondary full"
+                  onClick={() => {
+                    setReportEditId(modal.point.id);
+                    setReportLocation({
+                      x: modal.point.x ?? 195,
+                      y: modal.point.y ?? 325,
+                    });
+                    setReportRadius(modal.point.radius || 45);
+                    setReportType(modal.point.type);
+                    setReportText(modal.point.description || "");
+                    setModal({ type: "report" });
+                  }}
+                >
+                  Edit my report
+                </button>
+              )}
               {modal.point.created && (
                 <button
                   className="text-button danger-text"
@@ -643,7 +706,7 @@ export default function App() {
           {modal.type === "notice" && (
             <>
               <p className="muted">
-                The demo route passes a busy stretch of Market Street with open
+                The demo route passes a busy stretch of Church Street with open
                 businesses and nearby help points.
               </p>
               <p className="caption">
@@ -734,9 +797,9 @@ export default function App() {
                     <span className="eyebrow">MESSAGE PREVIEW</span>
                     <p>
                       {modal.kind === "emergency"
-                        ? "I need help. My demo location is near Riverside Avenue. Please check in with me."
+                        ? "I need help. My demo location is near Orange Avenue. Please check in with me."
                         : modal.kind === "location"
-                          ? "Here’s my demo location: near Riverside Avenue, SafeTrip demo neighborhood."
+                          ? "Here’s my demo location: near Orange Avenue, downtown Orlando demo map."
                           : `I’m on my way to ${selectedDest.name}. Follow along with my SafeTrip demo journey.`}
                     </p>
                   </div>

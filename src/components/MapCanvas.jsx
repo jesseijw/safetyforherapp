@@ -28,6 +28,11 @@ export default function MapCanvas({
   onReport,
   locateEnabled = true,
   compact = false,
+  incidents = [],
+  heatCells = [],
+  showIncidents = false,
+  selectedCell = null,
+  hideMarker = false,
 }) {
   const [zoom, setZoom] = useState(1);
   const points = routePoints(destination, route);
@@ -41,7 +46,7 @@ export default function MapCanvas({
           preserveAspectRatio="none"
           viewBox="0 0 390 650"
           role="img"
-          aria-label="Fictional neighborhood map with sample help points"
+          aria-label="Schematic map of downtown Orlando"
         >
           <defs>
             <pattern
@@ -67,69 +72,108 @@ export default function MapCanvas({
           </defs>
           <rect width="390" height="650" fill="var(--map-bg)" />
           <rect width="390" height="650" fill="url(#blocks)" />
+          <path d="M70 0L48 650" stroke="var(--road-edge)" strokeWidth="25" />
           <path
-            d="M-25 60Q85 130 38 280T45 680"
-            stroke="var(--water)"
-            strokeWidth="52"
-            fill="none"
-          />
-          <path
-            d="M65 0L65 650M0 180H390M0 300H390M0 410H390M185 0V650M300 0V650M0 490H390"
+            d="M150 0V650M215 0V650M280 0V650M0 150H390M0 300H390M0 370H390M0 460H390M0 550H390"
             stroke="var(--road-edge)"
             strokeWidth="20"
           />
           <path
-            d="M65 0L65 650M0 180H390M0 300H390M0 410H390M185 0V650M300 0V650M0 490H390"
+            d="M150 0V650M215 0V650M280 0V650M0 150H390M0 300H390M0 370H390M0 460H390M0 550H390"
             stroke="var(--road)"
-            strokeWidth="16"
+            strokeWidth="15"
           />
           <rect
-            x="202"
-            y="199"
-            width="80"
-            height="82"
-            rx="18"
+            x="295"
+            y="160"
+            width="90"
+            height="128"
+            rx="27"
             fill="var(--park)"
           />
-          <rect
-            x="88"
-            y="325"
-            width="73"
-            height="65"
-            rx="16"
-            fill="var(--park)"
-          />
+          <ellipse cx="345" cy="220" rx="35" ry="48" fill="var(--water)" />
+          <ellipse cx="215" cy="612" rx="45" ry="28" fill="var(--water)" />
           <g
             fill="var(--map-text)"
-            fontSize="9"
+            fontSize="10"
             fontFamily="inherit"
-            letterSpacing="1"
+            letterSpacing=".5"
           >
-            <text x="206" y="242">
-              JUNIPER
+            <text x="313" y="215">
+              LAKE EOLA
             </text>
-            <text x="216" y="254">
-              GARDENS
-            </text>
-            <text x="99" y="355">
-              RIVER
-            </text>
-            <text x="101" y="367">
+            <text x="328" y="230">
               PARK
             </text>
-            <text x="200" y="173">
-              MARKET STREET
+            <text x="177" y="615">
+              LAKE LUCERNE
             </text>
-            <text x="195" y="402">
-              RIVERSIDE AVENUE
+            <text x="230" y="143">
+              ROBINSON ST
             </text>
-            <text x="77" y="480">
-              5TH STREET
+            <text x="220" y="292">
+              CENTRAL BLVD
             </text>
-            <text x="309" y="115" transform="rotate(90 309 115)">
-              UNION AVENUE
+            <text x="70" y="362">
+              CHURCH ST
+            </text>
+            <text x="225" y="452">
+              SOUTH ST
+            </text>
+            <text x="75" y="542">
+              ANDERSON ST
+            </text>
+            <text x="143" y="22" transform="rotate(90 143 22)">
+              ORANGE AVE
+            </text>
+            <text x="208" y="22" transform="rotate(90 208 22)">
+              MAGNOLIA AVE
+            </text>
+            <text x="273" y="22" transform="rotate(90 273 22)">
+              ROSALIND AVE
+            </text>
+            <text x="47" y="100">
+              I-4
             </text>
           </g>
+          {heatCells.map((cell) => (
+            <rect
+              key={cell.id}
+              x={cell.x + 2}
+              y={cell.y + 2}
+              width="93.5"
+              height="126"
+              rx="12"
+              fill={
+                cell.count >= 20
+                  ? "#b23446"
+                  : cell.count >= 10
+                    ? "#dc714b"
+                    : cell.count >= 5
+                      ? "#e9ad56"
+                      : "#ecd18a"
+              }
+              fillOpacity={selectedCell === cell.id ? 0.7 : 0.38}
+              stroke={selectedCell === cell.id ? "var(--ink)" : "none"}
+              strokeWidth="3"
+            >
+              <title>
+                {cell.label}: {cell.count} sample incidents
+              </title>
+            </rect>
+          ))}
+          {filters.reports &&
+            reports
+              .filter((r) => Number.isFinite(r.x) && Number.isFinite(r.y))
+              .map((r) => (
+                <circle
+                  key={r.id}
+                  className="reported-area"
+                  cx={r.x}
+                  cy={r.y}
+                  r={r.radius || 45}
+                />
+              ))}
           {showRoute && (
             <>
               <polyline
@@ -158,6 +202,26 @@ export default function MapCanvas({
             </>
           )}
         </svg>
+        {showIncidents &&
+          incidents.map((incident) => (
+            <button
+              key={incident.id}
+              className="incident-dot"
+              style={{
+                left: (incident.x / 390) * 100 + "%",
+                top: (incident.y / 650) * 100 + "%",
+              }}
+              aria-label={`Sample ${incident.type}, ${new Date(incident.occurredAt).toLocaleDateString()}`}
+              onClick={() =>
+                onPoint({
+                  ...incident,
+                  name: `Sample ${incident.type}`,
+                  note: `Invented incident · ${new Date(incident.occurredAt).toLocaleDateString()}`,
+                  sampleIncident: true,
+                })
+              }
+            />
+          ))}
         {helpPoints
           .filter((p) => filters[p.type])
           .map((p) => (
@@ -186,8 +250,8 @@ export default function MapCanvas({
               key={r.id}
               className="map-pin report-pin"
               style={{
-                left: ((120 + (i % 3) * 40) / 390) * 100 + "%",
-                top: ((330 + (i % 4) * 22) / 650) * 100 + "%",
+                left: ((r.x ?? 120 + (i % 3) * 40) / 390) * 100 + "%",
+                top: ((r.y ?? 330 + (i % 4) * 22) / 650) * 100 + "%",
               }}
               onClick={() =>
                 onPoint({
@@ -196,22 +260,24 @@ export default function MapCanvas({
                   note: r.description || "Locally saved demo report",
                 })
               }
-              aria-label={r.type}
+              aria-label={`Your report: ${r.type}`}
             >
               <Flag size={14} />
             </button>
           ))}
-        <div
-          className="you-marker"
-          style={{
-            left: (pos[0] / 390) * 100 + "%",
-            top: (pos[1] / 650) * 100 + "%",
-          }}
-        >
-          <Navigation size={14} fill="currentColor" />
-        </div>
+        {!hideMarker && (
+          <div
+            className="you-marker"
+            style={{
+              left: (pos[0] / 390) * 100 + "%",
+              top: (pos[1] / 650) * 100 + "%",
+            }}
+          >
+            <Navigation size={14} fill="currentColor" />
+          </div>
+        )}
       </div>
-      <span className="map-label">DEMO NEIGHBORHOOD</span>
+      <span className="map-label">DOWNTOWN ORLANDO · DEMO</span>
       {!compact && (
         <>
           <div className="map-controls">

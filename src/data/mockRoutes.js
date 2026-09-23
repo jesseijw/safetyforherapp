@@ -1,13 +1,19 @@
 export const destinations = [
-  { id: "union", name: "Union Square", kind: "Town square", x: 300, y: 180 },
-  { id: "library", name: "Riverside Library", kind: "Library", x: 105, y: 155 },
-  { id: "cafe", name: "Juniper Café", kind: "Café", x: 315, y: 320 },
+  { id: "union", name: "Lake Eola Park", kind: "Park", x: 305, y: 270 },
+  {
+    id: "library",
+    name: "Orlando Public Library",
+    kind: "Library",
+    x: 260,
+    y: 320,
+  },
+  { id: "cafe", name: "City Hall", kind: "Civic building", x: 180, y: 500 },
   {
     id: "station",
-    name: "Market Street Station",
+    name: "Church Street Station",
     kind: "Transit station",
-    x: 90,
-    y: 385,
+    x: 115,
+    y: 370,
   },
 ];
 export const routes = [
@@ -40,13 +46,13 @@ export const routes = [
     score: 88,
     icon: "bus",
     note: "Bus + 6-minute walk",
-    detail: "Walk to Market Street, then take the demo Route 12 bus.",
+    detail: "Walk to Church Street, then take the demo Route 12 bus.",
   },
 ];
 export const helpPoints = [
   {
     id: "hospital",
-    name: "Riverside Medical Center",
+    name: "Demo medical help point",
     type: "hospital",
     x: 100,
     y: 235,
@@ -54,7 +60,7 @@ export const helpPoints = [
   },
   {
     id: "police",
-    name: "Neighborhood Police Station",
+    name: "Demo police help point",
     type: "police",
     x: 320,
     y: 410,
@@ -62,7 +68,7 @@ export const helpPoints = [
   },
   {
     id: "safe",
-    name: "Juniper Community Center",
+    name: "Demo community help point",
     type: "safe",
     x: 300,
     y: 300,

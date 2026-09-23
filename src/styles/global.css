@@ -1567,3 +1567,226 @@ small {
 .home-screen .map-notice {
   top: 38%;
 }
+.report-picker-map {
+  height: 270px;
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 18px;
+}
+.report-picker-map .compact {
+  height: 100%;
+  pointer-events: none;
+}
+.report-picker-map .map-drawing {
+  inset: 0;
+}
+.report-picker-map .map-label,
+.report-picker-map .you-marker {
+  display: none;
+}
+.report-picker-target {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  cursor: crosshair;
+}
+.report-picker-target svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.report-picker-target:focus-visible {
+  outline-offset: -4px;
+}
+.reported-area {
+  fill: #bc674333;
+  stroke: #bc6743;
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  pointer-events: none;
+}
+.sample-data-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  background: var(--blush);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px;
+  margin: 15px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--coral-dark);
+}
+.sample-data-banner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.sample-data-banner b {
+  font-size: 14px;
+}
+.period-tabs,
+.map-mode-tabs {
+  display: flex;
+  background: var(--blush);
+  padding: 4px;
+  border-radius: 12px;
+  gap: 3px;
+}
+.period-tabs button,
+.map-mode-tabs button {
+  flex: 1;
+  padding: 11px 3px;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 12px;
+  min-height: 42px;
+}
+.period-tabs button[aria-pressed="true"],
+.map-mode-tabs button[aria-pressed="true"] {
+  background: var(--panel);
+  color: var(--coral-dark);
+  box-shadow: 0 2px 6px #0001;
+  font-weight: 700;
+}
+.activity-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0;
+}
+.activity-toolbar .secondary {
+  font-size: 12px;
+  padding: 10px;
+}
+.sample-count {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: right;
+}
+.sample-count b {
+  font-size: 20px;
+  display: block;
+  color: var(--ink);
+}
+.map-mode-tabs {
+  background: transparent;
+  border: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.map-mode-tabs button[aria-pressed="true"] {
+  background: var(--blush);
+  box-shadow: none;
+}
+.activity-map {
+  height: 355px;
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.activity-map .compact {
+  height: 100%;
+  border-radius: 0;
+}
+.activity-map .map-drawing {
+  inset: 0;
+}
+.activity-map .map-label {
+  display: none;
+}
+.activity-map-badge {
+  position: absolute;
+  bottom: 9px;
+  left: 9px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+.heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  margin: 12px 0;
+  color: var(--muted);
+}
+.heat-legend i {
+  flex: 1;
+  height: 7px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    #ecd18a 0 25%,
+    #e9ad56 25% 50%,
+    #dc714b 50% 75%,
+    #b23446 75%
+  );
+}
+.incident-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  height: 11px;
+  width: 11px;
+  min-height: 0;
+  padding: 0;
+  background: #8f536e;
+  border: 1.5px solid var(--panel);
+  border-radius: 50%;
+  z-index: 2;
+}
+.incident-dot:focus-visible,
+.incident-dot:hover {
+  z-index: 5;
+  outline: 3px solid var(--coral);
+}
+.concentration-list > button {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 10px;
+  padding: 16px 0;
+  width: 100%;
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.concentration-list > button:last-child {
+  border-bottom: 0;
+}
+.concentration-list > button > span:nth-child(2) {
+  flex: 1;
+}
+.concentration-list small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.concentration-list .rank {
+  height: 26px;
+  width: 26px;
+  background: var(--blush);
+  color: var(--coral-dark);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.concentration-list button[aria-pressed="true"] {
+  color: var(--coral-dark);
+  font-weight: 700;
+}
+.map-source {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--coral-dark);
+}
