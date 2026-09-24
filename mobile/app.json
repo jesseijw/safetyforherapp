@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "SafeTrip",
+    "slug": "safetrip-mobile",
+    "scheme": "safetrip",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/she-logo.png",
+    "userInterfaceStyle": "automatic",
+    "platforms": [
+      "ios"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.jesseijw.safetrip",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

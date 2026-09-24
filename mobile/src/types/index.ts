@@ -1,0 +1,12 @@
+export type Coordinate = { latitude: number; longitude: number };
+export type Destination = { id: string; name: string; detail: string; coordinate: Coordinate };
+export type IncidentType = 'Theft' | 'Burglary' | 'Assault' | 'Vandalism';
+export type Incident = { id:string; type:IncidentType; occurredAt:string; coordinate:Coordinate };
+export type PersonalReport = { id:string; type:string; note:string; coordinate:Coordinate; radius:number; createdAt:string };
+export type Contact = { id:string; name:string; phone:string; trip:boolean; sos:boolean };
+export type Route = { id:string; name:string; coordinates:Coordinate[]; distance:number; duration:number; source:'apple'|'sample'; score?:number; note?:string; detail?:string; mode?:'safe'|'fast'|'transit'; steps:{instruction:string;distance:number}[] };
+export type Trip = { id:string; destination:Destination; route:Route; progress:number; paused:boolean; recipients:string[]; checkins:string[]; startedAt:string; reminded:boolean };
+export type HistoryItem = Trip & { finishedAt:string; status:'arrived'|'canceled' };
+export type Profile = { name:string; allergies:string; notes:string; emergency:string };
+export type Settings = { dark:boolean; checkins:boolean; arrival:boolean; sharing:boolean; notices:boolean };
+export type AppData = { version:1; contacts:Contact[]; reports:PersonalReport[]; history:HistoryItem[]; active:Trip|null; settings:Settings };
